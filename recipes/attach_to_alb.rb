@@ -25,26 +25,32 @@ ruby_block "attach to ALB" do
     require "aws-sdk-core"
 
     raise "alb_helper block not specified in layer JSON" if node[:alb_helper].nil?
-    raise "Target group ARN not specified in layer JSON" if node[:alb_helper][:target_group_arn].nil?
+    raise "Target group ARN not specified in layer JSON" if node[:alb_helper][:target_group_arn].nil? && node[:alb_helper][:target_group_arns].nil?
 
     stack = search("aws_opsworks_stack").first
     instance = search("aws_opsworks_instance", "self:true").first
 
     stack_region = stack[:region]
     ec2_instance_id = instance[:ec2_instance_id]
-    target_group_arn = node[:alb_helper][:target_group_arn]
+    target_group_arns = if !node[:alb_helper][:target_group_arn].nil?
+                          [node[:alb_helper][:target_group_arn]]
+                        else !node[:alb_helper][:target_group_arns].nil?
+                          node[:alb_helper][:target_group_arns]
+                        end
 
     Chef::Log.info("Creating ELB client in region #{stack_region}")
     client = Aws::ElasticLoadBalancingV2::Client.new(region: stack_region)
 
-    Chef::Log.info("Registering EC2 instance #{ec2_instance_id} with target group #{target_group_arn}")
+    Chef::Log.info("Registering EC2 instance #{ec2_instance_id} with target group #{target_group_arns}")
 
-    target_to_attach = {
-      target_group_arn: target_group_arn,
-      targets: [{ id: ec2_instance_id }]
-    }
+    target_group_arns.each do |arn|
+      target_to_attach = {
+        target_group_arn: arn,
+        targets: [{ id: ec2_instance_id }]
+      }
 
-    client.register_targets(target_to_attach)
+      client.register_targets(target_to_attach)
+    end
   end
   action :run
 end
