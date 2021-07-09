@@ -71,7 +71,7 @@ ruby_block "detach from ALB" do
           Chef::Log.info("#{seconds_elapsed} of a maximum #{connection_draining_timeout} seconds elapsed")
           Chef::Log.info("Sleeping #{ state_check_frequency} seconds")
 
-          statuses[arn] = target_health_state == "unused" || seconds_elapsed > connection_draining_timeout
+          statuses[arn] = target_health_state == "draining" || seconds_elapsed > connection_draining_timeout
         end
 
         break if statuses.values.all?
