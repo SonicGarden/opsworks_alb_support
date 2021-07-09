@@ -58,6 +58,7 @@ ruby_block "detach from ALB" do
       Chef::Log.info("delaying execution recipes until instance is drained from ALB or timeout of #{connection_draining_timeout} seconds elapses")
       start_time = Time.now
       statuses = {}
+      complete_health_statuses = %w[draining unused]
       loop do
         target_group_arns.each do |arn|
           response = client.describe_target_health({
@@ -71,7 +72,7 @@ ruby_block "detach from ALB" do
           Chef::Log.info("#{seconds_elapsed} of a maximum #{connection_draining_timeout} seconds elapsed")
           Chef::Log.info("Sleeping #{ state_check_frequency} seconds")
 
-          statuses[arn] = target_health_state == "draining" || seconds_elapsed > connection_draining_timeout
+          statuses[arn] = complete_health_statuses.include?(target_health_state) || seconds_elapsed > connection_draining_timeout
         end
 
         break if statuses.values.all?
