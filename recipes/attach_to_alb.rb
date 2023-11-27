@@ -15,6 +15,11 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 #
+chef_gem "aws-eventstream" do
+  version "< 1.3"
+  action :install
+end
+
 chef_gem "aws-sdk-core" do
   version "~> 2.6"
   action :install
