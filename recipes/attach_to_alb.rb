@@ -21,7 +21,7 @@ chef_gem "aws-eventstream" do
 end
 
 chef_gem "aws-sigv4" do
-  version "~> 1.0"
+  version "< 1.7"
   action :install
   options '--ignore-dependencies'
 end
