@@ -15,6 +15,21 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 #
+
+# NOTE: aws-sdk-core のインストールについて
+# aws-sdk-core の依存関係ツリーは以下のようになっている:
+#
+#     aws-sdk-core
+#      |- aws-sigv4
+#      |   `- aws-eventstream
+#      `- jmespath
+#
+# このうち aws-sigv4 (1.7.0) と aws-eventstream (1.3.0) で Ruby 2.3 のサポートが drop されてしまった。
+# 素朴に aws-sdk-core (~> 2.6) をインストールすると、これらのバージョンがインストールされてしまい、
+# Ruby 2.3 で動く Chef 12 環境でエラーが発生してしまう。
+# このエラーを回避するため、aws-sigv4 と aws-eventstream のバージョンに上限をつけつつ、aws-sdk-core を
+# インストールできるように、オプションを添えて個別に gem をインストールしている。
+
 chef_gem "aws-eventstream" do
   version "< 1.3"
   action :install
@@ -23,7 +38,7 @@ end
 chef_gem "aws-sigv4" do
   version "< 1.7"
   action :install
-  options '--ignore-dependencies'
+  options "--ignore-dependencies"
 end
 
 chef_gem "jmespath" do
@@ -34,7 +49,7 @@ end
 chef_gem "aws-sdk-core" do
   version "~> 2.6"
   action :install
-  options '--ignore-dependencies'
+  options "--ignore-dependencies"
 end
 
 ruby_block "attach to ALB" do
