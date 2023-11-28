@@ -23,7 +23,7 @@ end
 chef_gem "aws-sigv4" do
   version "~> 1.0"
   action :install
-  options({ :ignore_dependencies => true })
+  options '--ignore-dependencies'
 end
 
 chef_gem "jmespath" do
@@ -34,7 +34,7 @@ end
 chef_gem "aws-sdk-core" do
   version "~> 2.6"
   action :install
-  options({ :ignore_dependencies => true })
+  options '--ignore-dependencies'
 end
 
 ruby_block "attach to ALB" do
